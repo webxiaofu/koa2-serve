@@ -1,0 +1,76 @@
+const jsonwebtoken = require('jsonwebtoken')
+const User = require('../models/users')
+const {
+  secret
+} = require('../config')
+class UsersInterface {
+  //注册
+  async register(ctx) {
+    ctx.verifyParams({
+      username: {
+        type: 'string',
+        required: true
+      },
+      password: {
+        type: 'string',
+        required: true
+      },
+    });
+    /* 检验用户名是否重复 */
+    const {
+      username
+    } = ctx.request.body;
+    const repeatedUser = await User.findOne({
+      username
+    });
+    if (repeatedUser) {
+      ctx.throw(409, '用户名已经存在！');
+    }
+    const user = await new User(ctx.request.body).save();
+    ctx.body = {
+      user: user,
+      status: 1,
+    }
+  }
+  //查看所有用户
+  async findAllUsers(ctx) {
+    const users = await User.find();
+    ctx.body = {
+      status: 1,
+      users: users
+    }
+  }
+  //登录
+  async login(ctx) {
+    ctx.verifyParams({
+      username: {
+        type: 'string',
+        required: true
+      },
+      password: {
+        type: 'string',
+        required: true
+      },
+    });
+    const user = await User.findOne(ctx.request.body);
+    if (!user) {
+      ctx.throw(401, '用户名或密码不正确');
+    }
+    const {
+      _id,
+      username
+    } = user;
+    const token = jsonwebtoken.sign({
+      _id,
+      username
+    }, secret, {
+      expiresIn: '1d'
+    });
+    ctx.body = {
+      token:token,
+      status:1
+    };
+  }
+}
+
+module.exports = new UsersInterface();
