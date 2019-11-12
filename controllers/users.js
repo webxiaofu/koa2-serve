@@ -15,6 +15,10 @@ class UsersInterface {
         type: 'string',
         required: true
       },
+      email: {
+        type:'string',
+        required: true
+      }
     });
     /* 检验用户名是否重复 */
     const {
@@ -24,7 +28,10 @@ class UsersInterface {
       username
     });
     if (repeatedUser) {
-      ctx.throw(409, '用户名已经存在！');
+      ctx.body = {
+        status:0,
+        msg:'用户名已经存在！'
+      }
     }
     const user = await new User(ctx.request.body).save();
     ctx.body = {
@@ -54,7 +61,11 @@ class UsersInterface {
     });
     const user = await User.findOne(ctx.request.body);
     if (!user) {
-      ctx.throw(401, '用户名或密码不正确');
+      /* ctx.throw(401, '用户名或密码不正确'); */
+      ctx.body = {
+        status:0,
+        msg:'用户名或者密码不正确！'
+      }
     }
     const {
       _id,
@@ -68,7 +79,8 @@ class UsersInterface {
     });
     ctx.body = {
       token:token,
-      status:1
+      status:1,
+      user:user
     };
   }
 }
