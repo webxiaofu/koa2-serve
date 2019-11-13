@@ -13,7 +13,7 @@ router.prefix('/users');
 
 
 router.post('/register', register);
-router.get('/findAllUsers', auth ,findAllUsers);
+router.get('/findAllUsers' ,findAllUsers);
 router.post('/login',login);
 router.post('/login/sendcode',sendMailFn)
 module.exports = router

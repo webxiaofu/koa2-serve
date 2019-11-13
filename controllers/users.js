@@ -1,8 +1,10 @@
-const jsonwebtoken = require('jsonwebtoken')
-const User = require('../models/users')
+const jsonwebtoken = require('jsonwebtoken');
+const User = require('../models/users');
 const {
   secret
-} = require('../config')
+} = require('../config');
+const mongoose = require('mongoose')
+/* var ObjectID = require('mongodb').ObjectID; */
 class UsersInterface {
   //注册
   async register(ctx) {
@@ -32,16 +34,30 @@ class UsersInterface {
         status:0,
         msg:'用户名已经存在！'
       }
+    }else{
+      const user = await new User(ctx.request.body).save();
+      ctx.body = {
+        user: user,
+        status: 1,
+      }
     }
-    const user = await new User(ctx.request.body).save();
-    ctx.body = {
-      user: user,
-      status: 1,
-    }
+    
   }
   //查看所有用户
   async findAllUsers(ctx) {
-    const users = await User.find();
+    const { id } = ctx.query;
+    let conditions
+    if(id == undefined){
+      conditions = {}
+      //console.log('ok')
+    }else {
+      const _id = mongoose.Types.ObjectId(id);
+      conditions = {_id:_id}
+    }
+    //console.log(id)
+    //console.log(conditions)
+    
+    const users = await User.find(conditions);
     ctx.body = {
       status: 1,
       users: users
@@ -66,22 +82,24 @@ class UsersInterface {
         status:0,
         msg:'用户名或者密码不正确！'
       }
+    }else{
+      const {
+        _id,
+        username
+      } = user;
+      const token = jsonwebtoken.sign({
+        _id,
+        username
+      }, secret, {
+        expiresIn: '1d'
+      });
+      ctx.body = {
+        token:token,
+        status:1,
+        user:user
+      };
     }
-    const {
-      _id,
-      username
-    } = user;
-    const token = jsonwebtoken.sign({
-      _id,
-      username
-    }, secret, {
-      expiresIn: '1d'
-    });
-    ctx.body = {
-      token:token,
-      status:1,
-      user:user
-    };
+    
   }
 }
 
