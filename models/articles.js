@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 const { Schema,model } = mongoose;
 
 const articlesSchema = new Schema({
-  _id: { type: Object},
+  /* _id: { type: Object}, */
   title: { type: String},
   create_data: { type: String},
-  comment_count: { type: Number},
-  read_count: { type: Number},
-  collect_count: { type: Number},
+  comment_count: { type: String},
+  read_count: { type: String},
+  collect_count: { type: String},
   tag: { type: String},
   column: { type: String},
   content: { type: String},
@@ -20,4 +20,5 @@ const articlesSchema = new Schema({
   picture: { type: String},
        
 })
+/* articlesSchema.set('autoIndex', false);  //推荐 */
 module.exports= model('articles',articlesSchema)

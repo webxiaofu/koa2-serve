@@ -21,6 +21,7 @@ mongoose.connection.on('error', console.error);
 /* app.use(bodyparser({
   enableTypes:['json', 'form', 'text']
 })) */
+app.use(koaStatic(path.join(__dirname, 'public')));
 app.use(koaBody({
   multipart: true,
   formidable: {
@@ -28,11 +29,11 @@ app.use(koaBody({
     keepExtensions: true,
   },
 }));
-app.use(koaStatic(path.join(__dirname, 'public')));
+
 app.use(parameter(app))
 app.use(json())
 app.use(logger())
-app.use(koaStatic(__dirname + '/public'))
+/* app.use(koaStatic(__dirname + '/public')) */
 
 /* app.use(views(__dirname + '/views', {
   extension: 'pug'
