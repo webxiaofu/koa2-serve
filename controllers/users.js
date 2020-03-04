@@ -1,5 +1,7 @@
 const jsonwebtoken = require('jsonwebtoken');
 const User = require('../models/users');
+const Comment = require('../models/comments')
+const Article = require('../models/articles')
 const {
   secret
 } = require('../config');
@@ -9,6 +11,10 @@ class UsersInterface {
   //注册
   async register(ctx) {
     ctx.verifyParams({
+      nickname: {
+        type: 'string',
+        required: true
+      },
       username: {
         type: 'string',
         required: true
@@ -99,6 +105,87 @@ class UsersInterface {
         user:user
       };
     }
+    
+  }
+  async deleteArticle(ctx){
+    let {aid,uid} = ctx.query
+    const newArticle = await Article.remove({'_id':aid})
+    const newComment = await Comment.deleteMany({'aid':aid})
+    const newUser = await User.findByIdAndUpdate(uid,{
+      $pull:{
+        'articles.myself.write':aid
+      },
+      $inc:{
+        'articles.number':-1
+      }
+    },{
+      new:true
+    })
+    console.log(newUser)
+    ctx.body = {
+      status:1,
+      msg:'删除成功！'
+    }
+  }
+  //关注他人接口 status 0 关注 1 取消关注
+  async FocusOnOthers(ctx){
+    let {fid,uid,status}=ctx.request.body
+    if(status == 0){
+      const newUser1 = await User.findByIdAndUpdate(uid,{
+        $push:{
+          'focusOn.focusOn_id':fid
+        },
+        $inc:{
+          'focusOn.focusOn_number':1
+        }
+      },{
+        new:true
+      })
+      
+      const newUser2 = await User.findByIdAndUpdate(fid,{
+        $push:{
+          'fans.fans_id':uid
+        },
+        $inc:{
+          'fans.fans_number':1
+        }
+      },{
+        new:true
+      })
+      
+      ctx.body = {
+        status:1,
+        msg:'关注成功！'
+      }
+    }else if(status == 1){
+      const newUser1 = await User.findByIdAndUpdate(uid,{
+        $pull:{
+          'focusOn.focusOn_id':fid
+        },
+        $inc:{
+          'focusOn.focusOn_number':-1
+        }
+      },{
+        new:true
+      })
+      const newUser2 = await User.findByIdAndUpdate(fid,{
+        $pull:{
+          'fans.fans_id':uid
+        },
+        $inc:{
+          'fans.fans_number':-1
+        }
+      },{
+        new:true
+      })
+      ctx.body = {
+        status:1,
+        msg:'取消关注成功！'
+      }
+    }
+  }
+  //修改用户信息 
+  async updateUserInfo(ctx){
     
   }
 }

@@ -6,9 +6,9 @@ const articlesSchema = new Schema({
   /* _id: { type: Object}, */
   title: { type: String},
   create_data: { type: String},
-  comment_count: { type: String},
-  read_count: { type: String},
-  collect_count: { type: String},
+  comment_count: { type: Number},
+  read_count: { type: Number},
+  collect_count: { type: Number},
   tag: { type: String},
   column: { type: String},
   content: { type: String},

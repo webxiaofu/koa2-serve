@@ -67,8 +67,14 @@ class ArticlesInterface {
 
     try {
       const NewArticles = await new Articles(ctx.request.body).save()
-      /* console.log(NewArticles) */
       const {
+        _id
+      } = NewArticles
+      const {
+        author_id
+      } = NewArticles.author
+      /* console.log(NewArticles) */
+      /* const {
         author_id
       } = NewArticles.author
       const {
@@ -83,8 +89,7 @@ class ArticlesInterface {
       const {
         number
       } = UserInfo.articles
-      /* console.log(author_id)
-      console.log(_id) */
+
       const newNumber = (parseInt(number) + 1).toString()
       const updateData = {
         myself: {
@@ -92,11 +97,14 @@ class ArticlesInterface {
           collect: [...collect],
         },
         number: newNumber
-      }
+      } */
       //console.log(updateData)
       const newUser = await User.findByIdAndUpdate(author_id, {
-        $set: {
-          articles: updateData
+        $push: {
+          'articles.myself.write': _id
+        },
+        $inc:{
+          'articles.number':1
         }
       }, {
         new: true
@@ -121,6 +129,50 @@ class ArticlesInterface {
     2、文章展示界面
     3、文章编写界面完善
     */
+  }
+  async getArticleInfoById(ctx){
+    let {id} = ctx.query
+    const articlesInfo =await Articles.findOne({_id:id})
+    ctx.body = {
+      status:1,
+      articleInfo:articlesInfo
+    }
+  }
+  async addReadCount(ctx){
+    let {id} = ctx.query
+    const aa = await Articles.findById(id)
+    console.log(aa)
+    const newArticle = await Articles.findByIdAndUpdate(id,{
+      $inc:{
+        'read_count':1
+      }
+    },{
+      new:true
+    })
+    console.log(newArticle)
+    ctx.body={
+      status:1,
+      msg:'操作成功！'
+    }
+  }
+  //获取用户的所有 文章  （分页）
+  async findArticleByUid(ctx){
+    let {uid,page,pagesize} = ctx.query
+    let skip = (parseInt(page)-1)*parseInt(pagesize)
+    let count 
+    await Articles.find({'author.author_id':uid}).count(function(err,result){
+      if(err) {
+        //count = err
+      }else{
+        count = result
+      }
+    })
+    const articles = await Articles.find({'author.author_id':uid}).sort({'create_data':-1}).skip(skip).limit(parseInt(pagesize))
+    ctx.body = {
+      status:1,
+      count:count,
+      articles:articles
+    }
   }
 }
 module.exports = new ArticlesInterface();
