@@ -1,23 +1,16 @@
 const mongoose = require('mongoose')
-
 const {
   Schema,
   model
-} = mongoose;
+} = mongoose
+const collectCommentSchema = new Schema({
 
-const commentsSchema = new Schema({
   aid: {
     type: String
   },
   content: {
     type: String
   },
-  children: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref : 'collectComment'
-    }
-  ],
   create_timestamp: {
     type: String
   },
@@ -27,16 +20,22 @@ const commentsSchema = new Schema({
   reply_uid: {
     type: String
   },
-
+  reply_user: {
+    type: mongoose.Schema.Types.ObjectId,
+        // 引用  ref:后的是Classify模型
+    ref: "users" 
+    
+  },
   uid: {
     type: String
   },
   user: {
-  
     type: mongoose.Schema.Types.ObjectId,
         // 引用  ref:后的是Classify模型
     ref: "users" 
-  },
-})
+   
+    }
+  
 
-module.exports = model('comments', commentsSchema)
+})
+module.exports = model('collectComment',collectCommentSchema)

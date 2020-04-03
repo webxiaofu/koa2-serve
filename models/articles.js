@@ -13,9 +13,11 @@ const articlesSchema = new Schema({
   column: { type: String},
   content: { type: String},
   author:{
-    author_name: { type: String},
+    /* author_name: { type: String},
     author_id: { type: String},
-    photo: { type: String},
+    photo: { type: String}, */
+    type: mongoose.Schema.Types.ObjectId,
+    ref : 'users'
   },
   picture: { type: String},
        

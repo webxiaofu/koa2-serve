@@ -20,17 +20,13 @@ class ArticlesInterface {
     let UserCount
     Articles.find({}).count(function (err, result) {
       if (err) {
-        //console.log("1111")
-        //console.log(err)
         UserCount = err;
       } else {
-        //console.log("2222")
-        //console.log(result)
         UserCount = result;
       }
     }); /* try catch捕获错误情况？？？ */
     if (theSortId == 0) {
-      const articles = await Articles.find({}).sort({
+      const articles = await Articles.find({}).populate('author','nickname photo _id').sort({
         'create_data': -1
       }).skip(skip).limit(thePagesize);
       ctx.body = {
@@ -39,7 +35,7 @@ class ArticlesInterface {
         count: UserCount
       }
     } else if (theSortId == 1) {
-      const articles = await Articles.find({}).sort({
+      const articles = await Articles.find({}).populate('author','nickname photo _id').sort({
         'read_count': -1
       }).skip(skip).limit(thePagesize);
       ctx.body = {
@@ -48,7 +44,7 @@ class ArticlesInterface {
         count: UserCount
       }
     } else {
-      const articles = await Articles.find({}).sort({
+      const articles = await Articles.find({}).populate('author','nickname photo _id').sort({
         'collect_count': -1
       }).skip(skip).limit(thePagesize);
       ctx.body = {
@@ -71,35 +67,11 @@ class ArticlesInterface {
         _id
       } = NewArticles
       const {
-        author_id
-      } = NewArticles.author
-      /* console.log(NewArticles) */
-      /* const {
-        author_id
-      } = NewArticles.author
-      const {
-        _id
+        author
       } = NewArticles
-      const id = _id.toString()
-      const UserInfo = await User.findById(author_id)
-      const {
-        write,
-        collect
-      } = UserInfo.articles.myself
-      const {
-        number
-      } = UserInfo.articles
-
-      const newNumber = (parseInt(number) + 1).toString()
-      const updateData = {
-        myself: {
-          write: [...write, id],
-          collect: [...collect],
-        },
-        number: newNumber
-      } */
+      /* console.log(NewArticles) */
       //console.log(updateData)
-      const newUser = await User.findByIdAndUpdate(author_id, {
+      const newUser = await User.findByIdAndUpdate(author, {
         $push: {
           'articles.myself.write': _id
         },
@@ -132,7 +104,7 @@ class ArticlesInterface {
   }
   async getArticleInfoById(ctx){
     let {id} = ctx.query
-    const articlesInfo =await Articles.findOne({_id:id})
+    const articlesInfo =await Articles.findOne({_id:id}).populate('author','nickname photo _id')
     ctx.body = {
       status:1,
       articleInfo:articlesInfo
@@ -160,14 +132,14 @@ class ArticlesInterface {
     let {uid,page,pagesize} = ctx.query
     let skip = (parseInt(page)-1)*parseInt(pagesize)
     let count 
-    await Articles.find({'author.author_id':uid}).count(function(err,result){
+    await Articles.find({'author':uid}).count(function(err,result){
       if(err) {
         //count = err
       }else{
         count = result
       }
     })
-    const articles = await Articles.find({'author.author_id':uid}).sort({'create_data':-1}).skip(skip).limit(parseInt(pagesize))
+    const articles = await Articles.find({'author':uid}).populate('author','nickname photo _id').sort({'create_data':-1}).skip(skip).limit(parseInt(pagesize))
     ctx.body = {
       status:1,
       count:count,

@@ -186,7 +186,55 @@ class UsersInterface {
   }
   //修改用户信息 
   async updateUserInfo(ctx){
-    
+    let {nickname,
+    role,
+    address,
+    description,
+    homepage,
+    photo,
+    _id} = ctx.request.body
+    const newUserInfo = await User.findByIdAndUpdate(_id,{
+      $set:{
+        'nickname':nickname,
+        'role':role,
+        'description':description,
+        'homepage':homepage,
+        'address':address,
+        'photo':photo
+      }
+    },{
+      new:true
+    })
+    console.log(newUserInfo)
+    ctx.body = {
+      status:1,
+      msg:'修改成功！',
+      data:newUserInfo
+    }
+  }
+  //修改用户密码
+  async updatePassword(ctx){
+    let {old_password,new_password,repeat_new_password,uid} = ctx.request.body
+    const userInfo = await User.findById(uid)
+    console.log(userInfo)
+    if(userInfo.password == old_password){
+      const newUserInfo = await User.findByIdAndUpdate(uid,{
+        $set:{
+          'password':new_password
+        }
+      },{
+        new:true
+      })
+      ctx.body = {
+        status:1,
+        msg:'修改成功！'
+      }
+    }else{
+      ctx.body = {
+        status:0,
+        msg:"原密码错误！"
+      }
+    }
   }
 }
 
