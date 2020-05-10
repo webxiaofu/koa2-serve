@@ -49,7 +49,7 @@ class UsersInterface {
     }
     
   }
-  //查看所有用户
+  //查看所有用户或者某一个具体用户的信息
   async findAllUsers(ctx) {
     const { id } = ctx.query;
     let conditions
@@ -67,6 +67,30 @@ class UsersInterface {
     ctx.body = {
       status: 1,
       users: users
+    }
+  }
+  //带分页查询用户表
+  async getUsersByPage(ctx){
+    let {
+      
+      page,
+      pagesize
+    } = ctx.query
+    let skip = (parseInt(page) - 1) * parseInt(pagesize)
+    let count
+    await User.find({
+    }).count(function (err, result) {
+      if (err) {
+        //count = err
+      } else {
+        count = result
+      }
+    })
+    const users = await User.find().skip(skip).limit(parseInt(pagesize))
+    ctx.body = {
+      status:1,
+      count:count,
+      user:users
     }
   }
   //登录
@@ -235,6 +259,55 @@ class UsersInterface {
         msg:"原密码错误！"
       }
     }
+  }
+  //重置密码
+  async resetPwd(ctx){
+    let {username, password, email} = ctx.request.body
+    const newUserInfo = await User.findOneAndUpdate({username:username,email:email},{
+      $set:{
+        'password':password
+      }
+    },{
+      new:true
+    })
+    console.log(newUserInfo)
+    if(newUserInfo){
+      ctx.body = {
+        status:1,
+        msg:'重置成功！'
+      }
+    }else{
+      ctx.body = {
+        status:0,
+        msg:'账号与邮箱不匹配！'
+      }
+    }
+  }
+  //修改用户信息表(服务端)
+  async updateUser(ctx){
+    console.log(ctx.request.body)
+    const {_id, username, role, nickname, password, email, address, homepage}= ctx.request.body
+    const newUserInfo = await User.findByIdAndUpdate(_id,{
+      $set:{
+        'username':username,
+        'nickname':nickname,
+        'role':role,
+        'homepage':homepage,
+        'address':address,
+        'email':email,
+        'password':password
+      }
+    },{
+      new:true
+    })
+    console.log(newUserInfo)
+    ctx.body = {
+      status:1,
+      msg:'修改成功！',
+      data:newUserInfo
+    }
+
+
   }
 }
 

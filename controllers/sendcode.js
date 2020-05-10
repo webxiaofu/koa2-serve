@@ -10,7 +10,7 @@ class Code {
             secureConnection: true, // 使用 SSL
             auth: {
                 user: '1064230986@qq.com', // 发件地址
-                pass: 'oxhftxhtqyzubehh' // 发件密码
+                pass: 'upaghedrcjbmbbjb' // 发件密码
             }
         }));
 

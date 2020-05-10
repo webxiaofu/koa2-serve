@@ -17,5 +17,6 @@ class UploadInterface {
       msg: '上传失败！'
     } */
   }
+  
 }
 module.exports = new UploadInterface();
